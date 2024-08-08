@@ -13,6 +13,7 @@ function Gameboard() {
     //Render board
     const getBoard = () => board;
 
+    //Check if cell value != 0 to return value to prevent skipping player turn
     const checkCell = (row, column) => {
         if (board[row][column].getValue() != 0) {
             console.log(`Row ${row}, Column ${column} is already occupied!`);
@@ -37,6 +38,52 @@ function Gameboard() {
         const boardWithCellValues = board.map((row) =>
             row.map((cell) => cell.getValue()),
         );
+
+        function checkAllX(value) {
+            return value === "X";
+        }
+
+        function checkAllO(value) {
+            return value === "O";
+        }
+
+        function checkColumn(column) {
+            let arrayColumn = [];
+            for (let i = 0; i < board.length; i++) {
+                arrayColumn.push(board[i][column].getValue());
+            }
+            return arrayColumn;
+        }
+
+        function checkDiagonal() {
+            let arrayDiagonal = [];
+            for (let i = 0; i < board.length; i++) {
+                arrayDiagonal.push(board[i][i].getValue());
+            }
+            return arrayDiagonal;
+        }
+
+        function checkReverseDiagonal() {
+            let arrayRDiagonal = [];
+            arrayRDiagonal.push(board[0][2].getValue());
+            arrayRDiagonal.push(board[1][1].getValue());
+            arrayRDiagonal.push(board[2][0].getValue());
+            return arrayRDiagonal;
+        }
+
+        const checkRowX = (row) => boardWithCellValues[row].every(checkAllX);
+        const checkRowO = (row) => boardWithCellValues[row].every(checkAllO);
+
+        console.log(checkRowX(0));
+        console.log(checkRowO(0));
+        console.log(checkColumn(0));
+        console.log(checkColumn(0).every(checkAllX));
+        console.log(checkColumn(1));
+        console.log(checkDiagonal());
+        console.log(checkDiagonal().every(checkAllX));
+        console.log(checkReverseDiagonal());
+        console.log(checkReverseDiagonal().every(checkAllX));
+
         console.log(boardWithCellValues);
     };
 
@@ -92,11 +139,13 @@ function GameController(
     };
 
     const playRound = (row, column) => {
-        // Drop token for current player
         usedCell = board.checkCell(row, column);
+
+        //Check if cell is already used
         if (usedCell === true) {
             return;
         }
+        // Drop token for current player
         console.log(
             `Dropping ${
                 getActivePlayer().name
@@ -104,7 +153,6 @@ function GameController(
         );
 
         board.dropToken(row, column, getActivePlayer().token);
-
         //Win condition
 
         //Switch player turn
