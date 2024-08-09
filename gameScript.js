@@ -39,12 +39,20 @@ function Gameboard() {
             row.map((cell) => cell.getValue()),
         );
 
-        function checkAllX(value) {
-            return value === "X";
-        }
+        //const checkRowO = (row) => boardWithCellValues[row].every(checkAllO);
+        console.log(boardWithCellValues);
+    };
 
-        function checkAllO(value) {
-            return value === "O";
+    function checkWin() {
+        const checkAllX = (value) => value === "X";
+        const checkAllO = (value) => value === "O";
+
+        function checkRow(row) {
+            let arrayRow = [];
+            for (let i = 0; i < board.length; i++) {
+                arrayRow.push(board[row][i].getValue());
+            }
+            return arrayRow;
         }
 
         function checkColumn(column) {
@@ -71,24 +79,24 @@ function Gameboard() {
             return arrayRDiagonal;
         }
 
-        const checkRowX = (row) => boardWithCellValues[row].every(checkAllX);
-        const checkRowO = (row) => boardWithCellValues[row].every(checkAllO);
-
-        console.log(checkRowX(0));
-        console.log(checkRowO(0));
-        console.log(checkColumn(0));
-        console.log(checkColumn(0).every(checkAllX));
-        console.log(checkColumn(1));
-        console.log(checkDiagonal());
-        console.log(checkDiagonal().every(checkAllX));
-        console.log(checkReverseDiagonal());
-        console.log(checkReverseDiagonal().every(checkAllX));
-
-        console.log(boardWithCellValues);
-    };
+        for (let i = 0; i < board.length; i++) {
+            if (
+                checkRow(i).every(checkAllX) === true ||
+                checkRow(i).every(checkAllO) === true ||
+                checkColumn(i).every(checkAllX) === true ||
+                checkColumn(i).every(checkAllO) === true ||
+                checkDiagonal().every(checkAllO) === true ||
+                checkDiagonal().every(checkAllX) === true ||
+                checkReverseDiagonal().every(checkAllX) === true ||
+                checkReverseDiagonal().every(checkAllO) === true
+            ) {
+                return true;
+            }
+        }
+    }
 
     // Interface for board
-    return { getBoard, checkCell, dropToken, printBoard };
+    return { getBoard, checkCell, dropToken, printBoard, checkWin };
 }
 
 function Cell() {
@@ -119,10 +127,12 @@ function GameController(
         {
             name: playerOneName,
             token: "X",
+            score: 0,
         },
         {
             name: playerTwoName,
             token: "O",
+            score: 0,
         },
     ];
 
@@ -139,7 +149,7 @@ function GameController(
     };
 
     const playRound = (row, column) => {
-        usedCell = board.checkCell(row, column);
+        const usedCell = board.checkCell(row, column);
 
         //Check if cell is already used
         if (usedCell === true) {
@@ -153,8 +163,15 @@ function GameController(
         );
 
         board.dropToken(row, column, getActivePlayer().token);
-        //Win condition
 
+        //Win condition
+        const matchWin = board.checkWin(getActivePlayer().name);
+        if (matchWin == true) {
+            console.log(`The winner is: ${getActivePlayer().name}`);
+            getActivePlayer().score += 1;
+            console.log(`${players[0].name}'s Score: ${players[0].score}`);
+            console.log(`${players[1].name}'s Score: ${players[1].score}`);
+        }
         //Switch player turn
         switchPlayerTurn();
         printNewRound();
