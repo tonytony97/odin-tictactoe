@@ -43,6 +43,13 @@ function Gameboard() {
         console.log(boardWithCellValues);
     };
 
+    function resetBoard() {
+        for (let i = 0; i < board.length; i++) {
+            for (let j = 0; j < board.length; j++) {
+                board[i][j].addToken(0);
+            }
+        }
+    }
     function checkWin() {
         const checkAllX = (value) => value === "X";
         const checkAllO = (value) => value === "O";
@@ -90,13 +97,38 @@ function Gameboard() {
                 checkReverseDiagonal().every(checkAllX) === true ||
                 checkReverseDiagonal().every(checkAllO) === true
             ) {
+                resetBoard();
                 return true;
             }
         }
     }
 
+    function checkTie() {
+        const arrayTie = [];
+        for (let i = 0; i < board.length; i++) {
+            for (let j = 0; j < board.length; j++) {
+                if (board[i][j].getValue() == 0) {
+                    arrayTie.push(board[i][j].getValue());
+                }
+            }
+        }
+        if (arrayTie.length == 0) {
+            resetBoard();
+            return true;
+        }
+        console.log(arrayTie.length);
+    }
+
     // Interface for board
-    return { getBoard, checkCell, dropToken, printBoard, checkWin };
+    return {
+        getBoard,
+        checkCell,
+        dropToken,
+        printBoard,
+        resetBoard,
+        checkWin,
+        checkTie,
+    };
 }
 
 function Cell() {
@@ -157,20 +189,28 @@ function GameController(
         }
         // Drop token for current player
         console.log(
-            `Dropping ${
+            `Adding ${
                 getActivePlayer().name
-            }'s token into row ${row}, column ${column}...`,
+            } symbol into row ${row}, column ${column}...`,
         );
 
         board.dropToken(row, column, getActivePlayer().token);
-
+        board.printBoard();
         //Win condition
         const matchWin = board.checkWin(getActivePlayer().name);
+        const matchTie = board.checkTie();
         if (matchWin == true) {
-            console.log(`The winner is: ${getActivePlayer().name}`);
+            console.log(`The winner is: ${getActivePlayer().name}!`);
             getActivePlayer().score += 1;
             console.log(`${players[0].name}'s Score: ${players[0].score}`);
             console.log(`${players[1].name}'s Score: ${players[1].score}`);
+            activePlayer = players[0];
+            printNewRound();
+            return;
+        } else if (matchTie == true) {
+            console.log("Match ended in a Tie!");
+            printNewRound();
+            return;
         }
         //Switch player turn
         switchPlayerTurn();
