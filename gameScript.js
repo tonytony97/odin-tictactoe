@@ -43,14 +43,14 @@ function Gameboard() {
         console.log(boardWithCellValues);
     };
 
-    function resetBoard() {
+    const resetBoard = () => {
         for (let i = 0; i < board.length; i++) {
             for (let j = 0; j < board.length; j++) {
                 board[i][j].addToken(0);
             }
         }
-    }
-    function checkWin() {
+    };
+    const checkWin = () => {
         const checkAllX = (value) => value === "X";
         const checkAllO = (value) => value === "O";
 
@@ -101,9 +101,9 @@ function Gameboard() {
                 return true;
             }
         }
-    }
+    };
 
-    function checkTie() {
+    const checkTie = () => {
         const arrayTie = [];
         for (let i = 0; i < board.length; i++) {
             for (let j = 0; j < board.length; j++) {
@@ -116,8 +116,7 @@ function Gameboard() {
             resetBoard();
             return true;
         }
-        console.log(arrayTie.length);
-    }
+    };
 
     // Interface for board
     return {
@@ -174,6 +173,7 @@ function GameController(
         activePlayer = activePlayer === players[0] ? players[1] : players[0];
     };
     const getActivePlayer = () => activePlayer;
+    const getPlayer = (num) => players[num];
 
     const printNewRound = () => {
         board.printBoard();
@@ -200,7 +200,7 @@ function GameController(
         const matchWin = board.checkWin(getActivePlayer().name);
         const matchTie = board.checkTie();
         if (matchWin == true) {
-            console.log(`The winner is: ${getActivePlayer().name}!`);
+            alert(`The winner is: ${getActivePlayer().name}!`);
             getActivePlayer().score += 1;
             console.log(`${players[0].name}'s Score: ${players[0].score}`);
             console.log(`${players[1].name}'s Score: ${players[1].score}`);
@@ -222,7 +222,67 @@ function GameController(
     return {
         playRound,
         getActivePlayer,
+        getPlayer,
+        getBoard: board.getBoard,
     };
 }
 
-const game = GameController();
+function ScreenController() {
+    const game = GameController();
+    const displayTurn = document.querySelector(".turn");
+    const displayScore1 = document.querySelector(".player1");
+    const displayScore2 = document.querySelector(".player2");
+    const boardDiv = document.querySelector(".board");
+
+    const updateScreen = () => {
+        boardDiv.textContent = "";
+
+        let rowIndex = 0;
+
+        // get newest version of board and player turn
+        const board = game.getBoard();
+        const activePlayer = game.getActivePlayer();
+        const playerOne = game.getPlayer(0);
+        const playerTwo = game.getPlayer(1);
+
+        displayScore1.textContent =
+            `${playerOne.name}'s Score: ` + playerOne.score;
+        displayScore2.textContent =
+            `${playerTwo.name}'s Score: ` + playerTwo.score;
+        displayTurn.textContent = `${activePlayer.name}'s turn...`;
+
+        // Render board squares
+        board.forEach((row) => {
+            row.forEach((cell, index) => {
+                // Create clickable button elements each row
+                const cellButton = document.createElement("button");
+                cellButton.classList.add("cell");
+                // Create data attribute to identify column
+                cellButton.dataset.row = rowIndex;
+                cellButton.dataset.column = index;
+                cellButton.textContent = cell.getValue();
+                boardDiv.appendChild(cellButton);
+                if (index == 2) {
+                    rowIndex += 1;
+                }
+            });
+        });
+    };
+
+    function clickHandlerBoard(e) {
+        const selectedRow = e.target.dataset.row;
+        const selectedColumn = e.target.dataset.column;
+
+        // Make sure button is clicked
+        if (!selectedColumn) return;
+
+        game.playRound(selectedRow, selectedColumn);
+        updateScreen();
+    }
+    boardDiv.addEventListener("click", clickHandlerBoard);
+
+    // Initial render
+    updateScreen();
+}
+
+ScreenController();
