@@ -168,17 +168,28 @@ function GameController(
     ];
 
     let activePlayer = players[0];
+    const getPlayer = (num) => players[num];
+    const inputName = (num) => {
+        newName = prompt(
+            `Enter ${getPlayer(num).name} name`,
+            getPlayer(num).name,
+        );
+        if (newName != null) {
+            getPlayer(num).name = newName;
+        }
+    };
 
+    inputName(0);
+    inputName(1);
     const switchPlayerTurn = () => {
         activePlayer = activePlayer === players[0] ? players[1] : players[0];
     };
     const getActivePlayer = () => activePlayer;
-    const getPlayer = (num) => players[num];
 
-    const printNewRound = () => {
+    /*const printNewRound = () => {
         board.printBoard();
         console.log(`${getActivePlayer().name}'s turn.`);
-    };
+    };*/
 
     const playRound = (row, column) => {
         const usedCell = board.checkCell(row, column);
@@ -202,22 +213,15 @@ function GameController(
         if (matchWin == true) {
             alert(`The winner is: ${getActivePlayer().name}!`);
             getActivePlayer().score += 1;
-            console.log(`${players[0].name}'s Score: ${players[0].score}`);
-            console.log(`${players[1].name}'s Score: ${players[1].score}`);
             activePlayer = players[0];
-            printNewRound();
             return;
         } else if (matchTie == true) {
-            console.log("Match ended in a Tie!");
-            printNewRound();
+            alert("Match ended in a Tie!");
             return;
         }
         //Switch player turn
         switchPlayerTurn();
-        printNewRound();
     };
-
-    printNewRound();
 
     return {
         playRound,
@@ -260,7 +264,11 @@ function ScreenController() {
                 // Create data attribute to identify column
                 cellButton.dataset.row = rowIndex;
                 cellButton.dataset.column = index;
+
                 cellButton.textContent = cell.getValue();
+                if (cellButton.textContent === "0") {
+                    cellButton.textContent = "";
+                }
                 boardDiv.appendChild(cellButton);
                 if (index == 2) {
                     rowIndex += 1;
@@ -275,7 +283,6 @@ function ScreenController() {
 
         // Make sure button is clicked
         if (!selectedColumn) return;
-
         game.playRound(selectedRow, selectedColumn);
         updateScreen();
     }
